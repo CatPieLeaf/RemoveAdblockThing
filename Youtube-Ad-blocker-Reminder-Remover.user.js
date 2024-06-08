@@ -79,17 +79,26 @@
     if (fixTimestamps) timestampFix();
 
     // Remove Them pesski popups
-    function popupRemover() {
+function popupRemover() {
+    // Clear any existing interval
+    clearInterval(popupRemoverInterval);
 
-        setInterval(() => {
-            const modalOverlay = document.querySelector("tp-yt-iron-overlay-backdrop");
-            const popup = document.querySelector(".style-scope ytd-enforcement-message-view-model");
-            const popupButton = document.getElementById("dismiss-button");
+    let isPopupBeingProcessed = false; // Flag to track if a popup is being processed
 
-            var video = document.querySelector('video');
+    popupRemoverInterval = setInterval(() => {
+        if (isPopupBeingProcessed) return; // Skip if a popup is already being processed
 
-            const bodyStyle = document.body.style;
-            bodyStyle.setProperty('overflow-y', 'auto', 'important');
+        const modalOverlay = document.querySelector("tp-yt-iron-overlay-backdrop");
+        const popup = document.querySelector(".style-scope ytd-enforcement-message-view-model");
+        const popupButton = document.getElementById("dismiss-button");
+
+        var video = document.querySelector('video');
+
+        const bodyStyle = document.body.style;
+        bodyStyle.setProperty('overflow-y', 'auto', 'important');
+
+        if (modalOverlay || popup) {
+            isPopupBeingProcessed = true; // Set the flag to indicate a popup is being processed
 
             if (modalOverlay) {
                 modalOverlay.removeAttribute("opened");
@@ -99,7 +108,7 @@
             if (popup) {
                 log("Popup detected, removing...");
 
-                if(popupButton) popupButton.click();
+                if (popupButton) popupButton.click();
 
                 popup.remove();
                 video.play();
@@ -107,17 +116,19 @@
                 setTimeout(() => {
                     video.play();
                 }, 500);
-
-                log("Popup removed");
+              log("Popup removed");
             }
             // Check if the video is paused after removing the popup
-            if (!video.paused) return;
+            if (!video.paused) {
+                isPopupBeingProcessed = false; // Reset the flag since the popup has been processed
+                return;
+            }
             // UnPause The Video
             video.play();
-
-        }, 1000);
-    }
-
+            isPopupBeingProcessed = false; // Reset the flag since the popup has been processed
+        }
+    }, 1000);
+}
     // undetected adblocker method
     function removeAds()
     {
@@ -215,7 +226,7 @@
             iframe.style.top = '0';
             iframe.style.left = '0';
             iframe.style.zIndex = '9999';
-            iframe.style.pointerEvents = 'all'; 
+            iframe.style.pointerEvents = 'all';
 
             const videoPlayerElement = document.querySelector('.html5-video-player');
             videoPlayerElement.appendChild(iframe);
@@ -227,7 +238,7 @@
     }
     //
     // logic functionm
-    // 
+    //
 
     function removeAllDuplicateVideos() {
         const videos = document.querySelectorAll('video');
@@ -254,21 +265,21 @@
     }
 
     function clearAllPlayers() {
-    
+
         const videoPlayerElements = document.querySelectorAll('.html5-video-player');
-    
+
         if (videoPlayerElements.length === 0) {
             console.error("No elements with class 'html5-video-player' found.");
             return false;
         }
-    
+
         videoPlayerElements.forEach(videoPlayerElement => {
         const iframes = videoPlayerElement.querySelectorAll('iframe');
         iframes.forEach(iframe => {
             iframe.remove();
         });
     });
-    
+
         console.log("Removed all current players!");
         return true;
     }
@@ -352,7 +363,7 @@
     }
 
     function observerCallback(mutations) {
-        let isVideoAdded = mutations.some(mutation => 
+        let isVideoAdded = mutations.some(mutation =>
             Array.from(mutation.addedNodes).some(node => node.tagName === 'VIDEO')
         );
 
@@ -489,7 +500,7 @@
                 break;
             default:
                 console.info(`ℹ️ ${message}`, ...args);
-        }        
+        }
     }
 
 })();
