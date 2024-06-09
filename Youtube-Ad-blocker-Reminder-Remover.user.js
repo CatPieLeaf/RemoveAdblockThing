@@ -198,6 +198,8 @@ function popupRemover() {
             //
 
             let videoID = '';
+            let playList = '';
+            let timeStamp = '';
             const url = new URL(window.location.href);
             const urlParams = new URLSearchParams(url.search);
 
@@ -209,6 +211,14 @@ function popupRemover() {
                 if (liveIndex !== -1 && liveIndex + 1 < pathSegments.length) {
                     videoID = pathSegments[liveIndex + 1];
                 }
+            }
+
+            if (urlParams.has('list')) {
+                playList = "&listType=playlist&list=" + urlParams.get('list');
+            }
+
+            if (urlParams.has('t')) {
+                timeStamp = "&start=" + urlParams.get('t').replace('s', '');
             }
 
             if (!videoID) {
@@ -224,7 +234,7 @@ function popupRemover() {
 
             const startOfUrl = "https://www.youtube-nocookie.com/embed/";
             const endOfUrl = "?autoplay=1&modestbranding=1";
-            const finalUrl = startOfUrl + videoID + endOfUrl;
+            const finalUrl = startOfUrl + videoID + endOfUrl + playList + timeStamp;
 
             const iframe = document.createElement('iframe');
 
